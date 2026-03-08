@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#f1f5f9">
     <title>JSON 格式化工具</title>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
     <style>
         :root {
-            --bg-start: #667eea;
-            --bg-end: #764ba2;
-            /* 改为从上到下渐变，确保顶部颜色统一，与状态栏完美融合 */
-            --bg-gradient: linear-gradient(to bottom, var(--bg-start) 0%, var(--bg-end) 100%);
+            --bg-start: #f1f5f9;
+            --bg-end: #f1f5f9;
+            --bg-gradient: var(--bg-start);
             --bg-primary: #fff;
             --bg-secondary: #f8fafc;
             --bg-input: #fefefe;
@@ -23,17 +22,17 @@
             --resizer-bg: #e2e8f0;
             --resizer-hover: #cbd5e1;
             --resizer-handle: #94a3b8;
-            --resizer-dragging: #4f46e5;
-            --btn-primary-bg: #4f46e5;
-            --btn-primary-hover: #4338ca;
+            --resizer-dragging: #0891b2;
+            --btn-primary-bg: #0891b2;
+            --btn-primary-hover: #0e7490;
             --btn-secondary-bg: #fff;
             --btn-secondary-text: #374151;
             --btn-secondary-hover: #f3f4f6;
-            --small-btn-bg: #e0e7ff;
-            --small-btn-text: #4338ca;
-            --small-btn-hover: #c7d2fe;
+            --small-btn-bg: #cffafe;
+            --small-btn-text: #0e7490;
+            --small-btn-hover: #a5f3fc;
             --syntax-string: #007777;
-            --syntax-number: #AA00AA;
+            --syntax-number: #c2410c;
             --syntax-boolean: #0000FF;
             --syntax-null: #0000FF;
             --syntax-key: #CC0000;
@@ -44,18 +43,18 @@
             --collapse-icon-hover: #d0d0d0;
             --collapse-icon-color: #666;
             --placeholder-color: #94a3b8;
-            --select-border: #c7d2fe;
-            --select-hover: #a5b4fc;
+            --select-border: #a5f3fc;
+            --select-hover: #67e8f9;
             --select-bg: #fff;
             --select-text: #1f2937;
-            --header-btn-text: #ffffff;
+            --header-btn-text: #374151;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-start: #0f172a;
                 --bg-end: #1e293b;
-                --bg-gradient: linear-gradient(to bottom, var(--bg-start) 0%, var(--bg-end) 100%);
+                --bg-gradient: var(--bg-start);
                 --bg-primary: #1e293b;
                 --bg-secondary: #0f172a;
                 --bg-input: #1e293b;
@@ -65,17 +64,17 @@
                 --resizer-bg: #334155;
                 --resizer-hover: #475569;
                 --resizer-handle: #64748b;
-                --resizer-dragging: #6366f1;
-                --btn-primary-bg: #6366f1;
-                --btn-primary-hover: #4f46e5;
+                --resizer-dragging: #06b6d4;
+                --btn-primary-bg: #06b6d4;
+                --btn-primary-hover: #0891b2;
                 --btn-secondary-bg: #1e293b;
                 --btn-secondary-text: #f1f5f9;
                 --btn-secondary-hover: #334155;
-                --small-btn-bg: #312e81;
-                --small-btn-text: #c7d2fe;
-                --small-btn-hover: #3730a3;
+                --small-btn-bg: #164e63;
+                --small-btn-text: #a5f3fc;
+                --small-btn-hover: #155e75;
                 --syntax-string: #a5d6ff;
-                --syntax-number: #d2a8ff;
+                --syntax-number: #ffa657;
                 --syntax-boolean: #79c0ff;
                 --syntax-null: #79c0ff;
                 --syntax-key: #e06c75;
@@ -86,8 +85,8 @@
                 --collapse-icon-hover: #475569;
                 --collapse-icon-color: #94a3b8;
                 --placeholder-color: #64748b;
-                --select-border: #4338ca;
-                --select-hover: #6366f1;
+                --select-border: #0e7490;
+                --select-hover: #06b6d4;
                 --select-bg: #1e293b;
                 --select-text: #dddddd;
                 --header-btn-text: #cccccc;
@@ -95,9 +94,9 @@
         }
 
         html.light {
-            --bg-start: #667eea;
-            --bg-end: #764ba2;
-            --bg-gradient: linear-gradient(to bottom, var(--bg-start) 0%, var(--bg-end) 100%);
+            --bg-start: #f1f5f9;
+            --bg-end: #f1f5f9;
+            --bg-gradient: var(--bg-start);
             --bg-primary: #fff;
             --bg-secondary: #f8fafc;
             --bg-input: #fefefe;
@@ -107,17 +106,17 @@
             --resizer-bg: #e2e8f0;
             --resizer-hover: #999999;
             --resizer-handle: #94a3b8;
-            --resizer-dragging: #4f46e5;
-            --btn-primary-bg: #4f46e5;
-            --btn-primary-hover: #4338ca;
+            --resizer-dragging: #0891b2;
+            --btn-primary-bg: #0891b2;
+            --btn-primary-hover: #0e7490;
             --btn-secondary-bg: #fff;
             --btn-secondary-text: #374151;
             --btn-secondary-hover: #f3f4f6;
-            --small-btn-bg: #e0e7ff;
-            --small-btn-text: #4338ca;
-            --small-btn-hover: #c7d2fe;
+            --small-btn-bg: #cffafe;
+            --small-btn-text: #0e7490;
+            --small-btn-hover: #a5f3fc;
             --syntax-string: #007777;
-            --syntax-number: #AA00AA;
+            --syntax-number: #c2410c;
             --syntax-boolean: #0000FF;
             --syntax-null: #0000FF;
             --syntax-key: #CC0000;
@@ -128,17 +127,17 @@
             --collapse-icon-hover: #d0d0d0;
             --collapse-icon-color: #666;
             --placeholder-color: #94a3b8;
-            --select-border: #c7d2fe;
-            --select-hover: #a5b4fc;
+            --select-border: #a5f3fc;
+            --select-hover: #67e8f9;
             --select-bg: #fff;
             --select-text: #1f2937;
-            --header-btn-text: #ffffff;
+            --header-btn-text: #374151;
         }
 
         html.dark {
             --bg-start: #0f172a;
-            --bg-end: #1e293b;
-            --bg-gradient: linear-gradient(to bottom, var(--bg-start) 0%, var(--bg-end) 100%);
+            --bg-end: #0f172a;
+            --bg-gradient: var(--bg-start);
             --bg-primary: #1e293b;
             --bg-secondary: #0f172a;
             --bg-input: #1e293b;
@@ -148,17 +147,17 @@
             --resizer-bg: #334155;
             --resizer-hover: #475569;
             --resizer-handle: #64748b;
-            --resizer-dragging: #6366f1;
-            --btn-primary-bg: #6366f1;
-            --btn-primary-hover: #4f46e5;
+            --resizer-dragging: #06b6d4;
+            --btn-primary-bg: #06b6d4;
+            --btn-primary-hover: #0891b2;
             --btn-secondary-bg: #1e293b;
             --btn-secondary-text: #f1f5f9;
             --btn-secondary-hover: #334155;
-            --small-btn-bg: #312e81;
-            --small-btn-text: #c7d2fe;
-            --small-btn-hover: #3730a3;
+            --small-btn-bg: #164e63;
+            --small-btn-text: #a5f3fc;
+            --small-btn-hover: #155e75;
             --syntax-string: #a5d6ff;
-            --syntax-number: #d2a8ff;
+            --syntax-number: #ffa657;
             --syntax-boolean: #79c0ff;
             --syntax-null: #79c0ff;
             --syntax-key: #e06c75;
@@ -169,8 +168,8 @@
             --collapse-icon-hover: #475569;
             --collapse-icon-color: #94a3b8;
             --placeholder-color: #64748b;
-            --select-border: #4338ca;
-            --select-hover: #6366f1;
+            --select-border: #0e7490;
+            --select-hover: #06b6d4;
             --select-bg: #1e293b;
             --select-text: #dddddd;
             --header-btn-text: #cccccc;
@@ -184,7 +183,6 @@
 
         html {
             height: 100%;
-            /* 设置背景色作为 fallback，解决 Safari 状态栏可能显示白色的问题 */
             background-color: var(--bg-start);
         }
 
@@ -204,7 +202,6 @@
             color: var(--text-primary);
         }
 
-        /* 固定背景层 */
         body::before {
             content: "";
             position: fixed;
@@ -214,8 +211,6 @@
             height: 100%;
             z-index: -1;
             background: var(--bg-gradient);
-            background-size: cover;
-            background-repeat: no-repeat;
             pointer-events: none;
         }
 
@@ -242,9 +237,8 @@
             align-items: center;
             gap: 10px;
 
-            color: #fff;
+            color: var(--text-primary);
             font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 
             font-size: 24px;
             line-height: 40px;
@@ -280,12 +274,12 @@
 
         .btn {
             padding: 10px 24px;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.15s ease;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -294,18 +288,17 @@
         .btn-primary {
             background: var(--btn-primary-bg);
             color: white;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+            border-color: var(--btn-primary-bg);
         }
 
         .btn-primary:hover {
             background: var(--btn-primary-hover);
-            transform: translateY(-1px);
+            border-color: var(--btn-primary-hover);
         }
 
         .btn-secondary {
             background: var(--btn-secondary-bg);
             color: var(--btn-secondary-text);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn-secondary:hover {
@@ -326,10 +319,11 @@
             grid-template-columns: 1fr auto 1fr;
             gap: 0;
             background: var(--bg-primary);
-            border-radius: 13px;
+            border-radius: 8px;
             /* 修改间距 文本框四周间距改为 1.5 倍 (10px -> 15px) */
             padding: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
             flex: 1;
             min-height: 0;
             overflow: hidden;
@@ -387,14 +381,14 @@
             width: 12px;
             cursor: col-resize;
             margin: 0 8px;
-            border-radius: 6px;
+            border-radius: 4px;
         }
 
         .resizer-v {
             height: 12px;
             cursor: row-resize;
             margin: 8px 0;
-            border-radius: 6px;
+            border-radius: 4px;
             display: none;
         }
 
@@ -424,7 +418,7 @@
             align-items: center;
             padding: 6px 8px 3px 8px;
             background: var(--bg-secondary);
-            border-radius: 13px 13px 0 0;
+            border-radius: 8px 8px 0 0;
             border: 1px solid var(--border-color);
             border-bottom: none;
             flex-shrink: 0;
@@ -482,7 +476,7 @@
             /* 修改间距 文本框内部间距改为 1.5 倍 (8px -> 12px) */
             padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 0 0 13px 13px;
+            border-radius: 0 0 8px 8px;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
             line-height: 1.6;
@@ -510,7 +504,7 @@
             /* 修改间距 文本框内部间距改为 1.5 倍 (8px -> 12px) */
             padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 0 0 13px 13px;
+            border-radius: 0 0 8px 8px;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
             line-height: 1.6;
@@ -534,13 +528,13 @@
             left: 50%;
             transform: translateX(-50%) translateY(-100px);
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             z-index: 9999;
             opacity: 0;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .toast.show {
@@ -565,7 +559,7 @@
             align-items: center;
             gap: 6px;
             background: var(--small-btn-bg);
-            padding: 3.5px 10px;
+            padding: 3.5px 5px;
             border-radius: 4px;
             border: none;
             box-sizing: border-box;
@@ -605,7 +599,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.15s;
         }
 
         .small-btn:hover {
@@ -708,24 +702,22 @@
             right: 70px;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
-            color: white;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
             font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s;
+            transition: background 0.15s;
             z-index: 100;
         }
 
         .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
+            background: var(--btn-secondary-hover);
         }
 
         .lang-toggle {
@@ -734,26 +726,23 @@
             right: 20px;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: var(--header-btn-text);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            color: var(--text-primary);
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s;
+            transition: background 0.15s;
             z-index: 100;
         }
 
         .lang-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
+            background: var(--btn-secondary-hover);
         }
     </style>
 </head>
@@ -1221,24 +1210,36 @@
             // 布局配置
             const layoutConfig = {
                 zh: {
-                    // 修改间距 重新计算宽度
-                    // Panel: 300 (工具栏按钮适配)
-                    // Container: 300*2 + 28(Resizer) + 30(ContainerPadding) + 24(TextBoxPadding补正) = 682
-                    // Breakpoint: 682 + 30(BodyPadding) = 712
-                    panelMinWidth: 300,
-                    verticalBreakpoint: 712,
-                    containerMinWidth: 682,
-                    verticalContainerMinWidth: 330
+                    // 最小宽度计算（确保工具栏按钮不换行）
+                    // 最宽行：右侧输出工具栏
+                    //   Group1: "📁 全部收起"(~76) + gap(6) + indent-selector(~106) = 188
+                    //   Group间距: 6
+                    //   Group2: "📋 复制"(~52) + gap(6) + "🗑️ 清空"(~52) = 110
+                    //   工具栏开销(padding 8*2 + border 1*2): 18
+                    //   合计: 188+6+110+18 = 322 → 取 330
+                    // Container: Panel*2 + Resizer(12+margin 8*2=28) + ContainerPadding(15*2) + ContainerBorder(1*2) = 720
+                    // Breakpoint: Container + BodyPadding(15*2) = 750
+                    // VerticalContainer: Panel + ContainerPadding(30) + ContainerBorder(2) = 362
+                    panelMinWidth: 330,
+                    verticalBreakpoint: 750,
+                    containerMinWidth: 720,
+                    verticalContainerMinWidth: 362
                 },
                 en: {
-                    // 修改间距 重新计算宽度
-                    // Panel: 360 (英文工具栏适配)
-                    // Container: 360*2 + 28(Resizer) + 30(ContainerPadding) + 24(TextBoxPadding补正) = 802
-                    // Breakpoint: 802 + 30(BodyPadding) = 832
-                    panelMinWidth: 360,
-                    verticalBreakpoint: 832,
-                    containerMinWidth: 802,
-                    verticalContainerMinWidth: 390
+                    // 最小宽度计算（确保工具栏按钮不换行）
+                    // 最宽行：右侧输出工具栏
+                    //   Group1: "📁 Collapse All"(~112) + gap(6) + indent-selector(~134) = 252
+                    //   Group间距: 6
+                    //   Group2: "📋 Copy"(~56) + gap(6) + "🗑️ Clear"(~63) = 125
+                    //   工具栏开销(padding 8*2 + border 1*2): 18
+                    //   合计: 252+6+125+18 = 401 → 取 380
+                    // Container: 380*2 + 28 + 30 + 2 = 820
+                    // Breakpoint: 820 + 30 = 850
+                    // VerticalContainer: 380 + 32 = 412
+                    panelMinWidth: 380,
+                    verticalBreakpoint: 850,
+                    containerMinWidth: 820,
+                    verticalContainerMinWidth: 412
                 }
             };
 
@@ -1480,8 +1481,8 @@
                     isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 }
 
-                // Light: #667eea, Dark: #0f172a
-                meta.content = isDark ? '#0f172a' : '#667eea';
+                // Light: #f1f5f9, Dark: #0f172a
+                meta.content = isDark ? '#0f172a' : '#f1f5f9';
             }
 
             function applyTheme() {
@@ -1543,11 +1544,11 @@
                     inputPlaceholder: '在此粘贴需要格式化的 JSON 数据...',
                     outputPlaceholder: '此处将展示格式化结果...',
                     toastCopySuccess: '✅ 已复制到剪贴板！',
-                    toastCopyEmpty: '没有可复制的内容',
+                    toastCopyEmpty: '❗️ 没有可复制的内容',
                     toastClearSuccess: '✅ 已清空输入内容',
-                    toastClearEmpty: '没有可清空的内容',
+                    toastClearEmpty: '❗️ 没有可清空的内容',
                     toastFillExample: '✅ 已填充示例数据',
-                    toastInputEmpty: '请输入 JSON 数据',
+                    toastInputEmpty: '❗️ 请输入 JSON 数据',
                     toastJsonError: '❌ JSON 格式错误：',
                     toastJsonValid: '✅ JSON 格式正确',
                     themeTitleAuto: '切换主题 (自动)',
@@ -1582,11 +1583,11 @@
                     inputPlaceholder: 'Paste JSON here...',
                     outputPlaceholder: 'Formatted result will appear here...',
                     toastCopySuccess: '✅ Copied to clipboard!',
-                    toastCopyEmpty: 'Nothing to copy',
+                    toastCopyEmpty: '❗️ Nothing to copy',
                     toastClearSuccess: '✅ Input cleared',
-                    toastClearEmpty: 'Nothing to clear',
+                    toastClearEmpty: '❗️ Nothing to clear',
                     toastFillExample: '✅ Example data filled',
-                    toastInputEmpty: 'Please enter JSON data',
+                    toastInputEmpty: '❗️ Please enter JSON data',
                     toastJsonError: '❌ Invalid JSON: ',
                     toastJsonValid: '✅ Valid JSON',
                     themeTitleAuto: 'Switch Theme (Auto)',
