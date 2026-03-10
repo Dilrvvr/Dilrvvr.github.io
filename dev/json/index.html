@@ -48,6 +48,8 @@
             --select-bg: #fff;
             --select-text: #1f2937;
             --header-btn-text: #374151;
+            --selection-bg: #b3d4fc;
+            --selection-text: inherit;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -90,6 +92,8 @@
                 --select-bg: #1e293b;
                 --select-text: #dddddd;
                 --header-btn-text: #cccccc;
+                --selection-bg: rgba(255, 255, 255, 0.2);
+                --selection-text: inherit;
             }
         }
 
@@ -132,6 +136,8 @@
             --select-bg: #fff;
             --select-text: #1f2937;
             --header-btn-text: #374151;
+            --selection-bg: #b3d4fc;
+            --selection-text: inherit;
         }
 
         html.dark {
@@ -173,12 +179,19 @@
             --select-bg: #1e293b;
             --select-text: #dddddd;
             --header-btn-text: #cccccc;
+            --selection-bg: rgba(255, 255, 255, 0.2);
+            --selection-text: inherit;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        ::selection {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
         }
 
         html {
@@ -330,18 +343,21 @@
             min-width: var(--container-min-width, 716px);
         }
 
-        body.layout-vertical {
-            min-height: 500px;
+        body.layout-vertical .container {
+            min-height: 0;
         }
 
         body.layout-vertical .editor-container {
             grid-template-columns: 1fr;
-            grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+            grid-template-rows: minmax(var(--vertical-panel-min-height, 140px), 1fr) auto minmax(var(--vertical-panel-min-height, 140px), 1fr);
             min-width: var(--vertical-container-min-width, 354px);
+            /* 确保两个面板都能显示最小高度：面板×2 + 分隔条(28px) + 内边距(30px) + 边框(2px) */
+            min-height: calc(var(--vertical-panel-min-height, 140px) * 2 + 60px);
         }
 
         body.layout-vertical .editor-panel {
             min-width: 0;
+            min-height: var(--vertical-panel-min-height, 140px);
         }
 
         body.layout-vertical textarea,
@@ -440,7 +456,7 @@
             display: flex;
             /* 修改间距 按钮横向间距缩小一半 (12px -> 6px) */
             gap: 6px;
-            align-items: center;
+            align-items: stretch;
         }
 
         .output-toolbar {
@@ -479,7 +495,7 @@
             border-radius: 0 0 8px 8px;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 21px;
             resize: none;
             outline: none;
             transition: border-color 0.2s;
@@ -507,7 +523,7 @@
             border-radius: 0 0 8px 8px;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 21px;
             overflow: auto;
             background: var(--bg-secondary);
             box-sizing: border-box;
@@ -559,10 +575,11 @@
             align-items: center;
             gap: 6px;
             background: var(--small-btn-bg);
-            padding: 3.5px 5px;
+            padding: 4px 5px;
             border-radius: 4px;
             border: none;
             box-sizing: border-box;
+            height: 24px;
         }
 
         .indent-selector label {
@@ -600,6 +617,11 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            height: 24px;
         }
 
         .small-btn:hover {
@@ -674,7 +696,31 @@
             background: var(--collapse-icon-hover);
         }
 
+        .copy-icon {
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            font-size: 10px;
+            color: var(--collapse-icon-color);
+            background: var(--collapse-icon-bg);
+            border-radius: 3px;
+            margin-right: 4px;
+            vertical-align: middle;
+            transition: all 0.15s;
+            font-style: normal;
+        }
 
+        .copy-icon:hover {
+            background: var(--collapse-icon-hover);
+        }
+
+        .copy-icon.copied {
+            color: #16a34a;
+        }
 
         .collapsible {
             display: inline;
@@ -777,15 +823,15 @@
                 <div class="output-toolbar">
                     <!-- 修改间距 使用 class 替代内联样式，gap 缩小一半 -->
                     <div class="toolbar-group">
-                        <button class="small-btn" id="toggleCollapseBtn" onclick="toggleCollapseAll()">全部收起</button>
                         <div class="indent-selector">
                             <label for="indent" id="labelIndent">缩进:</label>
-                            <select id="indent">
+                            <select id="indent" onchange="onIndentChange()">
                                 <option value="2" id="optIndent2">2 空格</option>
                                 <option value="4" id="optIndent4">4 空格</option>
                                 <option value="tab" id="optIndentTab">Tab</option>
                             </select>
                         </div>
+                        <button class="small-btn" id="toggleCollapseBtn" onclick="toggleCollapseAll()">全部收起</button>
                     </div>
                     <!-- 修改间距 margin-left 缩小一半 (12px -> 6px) -->
                     <div class="toolbar-group" style="margin-left: 6px;">
@@ -859,7 +905,7 @@
                 const tabs = INDENT_CHAR.repeat(indent);
                 const innerTabs = INDENT_CHAR.repeat(indent + 1);
 
-                let html = `<span class="ArrayBrace">[</span><span class="collapse-icon" onclick="toggleCollapse(this)">−</span><span class="collapsible">`;
+                let html = `<span class="ArrayBrace">[</span><span class="collapse-icon" onclick="toggleCollapse(this)">−</span><span class="copy-icon" onclick="copySection(this)" title="Copy">⧉</span><span class="collapsible">`;
 
                 for (let i = 0; i < arr.length; i++) {
                     const isLast = i === arr.length - 1;
@@ -880,7 +926,7 @@
                 const tabs = INDENT_CHAR.repeat(indent);
                 const innerTabs = INDENT_CHAR.repeat(indent + 1);
 
-                let html = `<span class="ObjectBrace">{</span><span class="collapse-icon" onclick="toggleCollapse(this)">−</span><span class="collapsible">`;
+                let html = `<span class="ObjectBrace">{</span><span class="collapse-icon" onclick="toggleCollapse(this)">−</span><span class="copy-icon" onclick="copySection(this)" title="Copy">⧉</span><span class="collapsible">`;
 
                 for (let i = 0; i < keys.length; i++) {
                     const key = keys[i];
@@ -918,8 +964,18 @@
                 }
             }
 
+            function onIndentChange() {
+                if (!currentJSON) return;
+                getIndent();
+                const output = document.getElementById('output');
+                output.innerHTML = `<pre class="CodeContainer">${processValue(currentJSON, 0, false)}</pre>`;
+                updateToggleButton();
+                updateOutputInfo();
+            }
+
             function toggleCollapse(icon) {
-                const collapsible = icon.nextElementSibling;
+                const copyIcon = icon.nextElementSibling;
+                const collapsible = copyIcon.nextElementSibling;
                 const ellipsis = collapsible.nextElementSibling;
 
                 if (collapsible.classList.contains('hidden')) {
@@ -936,6 +992,54 @@
                 updateToggleButton();
             }
 
+            function copySection(copyIcon) {
+                // Structure: openBrace → collapseIcon → copyIcon → collapsible → ellipsis → closeBrace
+                const collapseIcon = copyIcon.previousElementSibling;
+                const openBrace = collapseIcon.previousElementSibling;
+                const collapsible = copyIcon.nextElementSibling;
+                const ellipsis = collapsible.nextElementSibling;
+                const closeBrace = ellipsis.nextElementSibling;
+
+                // Clone collapsible content, remove icons and ellipsis
+                const clone = collapsible.cloneNode(true);
+                clone.querySelectorAll('.collapse-icon, .copy-icon, .ellipsis').forEach(el => el.remove());
+
+                const raw = openBrace.textContent + clone.textContent.trimEnd() + '\n' + closeBrace.textContent;
+
+                // Remove excess indentation from inner lines, keeping one indent level
+                const lines = raw.split('\n');
+                if (lines.length > 2) {
+                    const innerLines = lines.slice(1, -1);
+                    const indents = innerLines.filter(l => l.trim()).map(l => l.match(/^(\s*)/)[1].length);
+                    const minIndent = Math.min(...indents);
+                    const remove = minIndent - INDENT_CHAR.length;
+                    if (remove > 0) {
+                        for (let i = 1; i < lines.length - 1; i++) {
+                            lines[i] = lines[i].slice(remove);
+                        }
+                    }
+                }
+                const text = lines.join('\n');
+
+                navigator.clipboard.writeText(text).then(() => {
+                    // Brief visual feedback
+                    copyIcon.classList.add('copied');
+                    const orig = copyIcon.textContent;
+                    copyIcon.textContent = '✓';
+                    setTimeout(() => {
+                        copyIcon.textContent = orig;
+                        copyIcon.classList.remove('copied');
+                    }, 1000);
+                }).catch(() => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                });
+            }
+
             function toggleCollapseAll() {
                 const icons = document.querySelectorAll('.collapse-icon');
                 const hasCollapsed = Array.from(icons).some(icon => icon.classList.contains('collapsed'));
@@ -950,7 +1054,8 @@
             function expandAll() {
                 const icons = document.querySelectorAll('.collapse-icon');
                 icons.forEach(icon => {
-                    const collapsible = icon.nextElementSibling;
+                    const copyIcon = icon.nextElementSibling;
+                    const collapsible = copyIcon.nextElementSibling;
                     const ellipsis = collapsible.nextElementSibling;
                     collapsible.classList.remove('hidden');
                     ellipsis.classList.remove('show');
@@ -964,7 +1069,8 @@
             function collapseAll() {
                 const icons = document.querySelectorAll('.collapse-icon');
                 icons.forEach(icon => {
-                    const collapsible = icon.nextElementSibling;
+                    const copyIcon = icon.nextElementSibling;
+                    const collapsible = copyIcon.nextElementSibling;
                     const ellipsis = collapsible.nextElementSibling;
                     collapsible.classList.add('hidden');
                     ellipsis.classList.add('show');
@@ -1096,12 +1202,9 @@
                     return;
                 }
 
-                // 克隆输出内容，移除三角符号和省略号
+                // 克隆输出内容，移除三角符号、拷贝按钮和省略号
                 const clone = output.cloneNode(true);
-                const collapseIcons = clone.querySelectorAll('.collapse-icon');
-                collapseIcons.forEach(icon => icon.remove());
-                const ellipsis = clone.querySelectorAll('.ellipsis');
-                ellipsis.forEach(el => el.remove());
+                clone.querySelectorAll('.collapse-icon, .copy-icon, .ellipsis').forEach(el => el.remove());
 
                 // 获取纯文本内容（不含HTML标签、三角符号和省略号）
                 const textContent = clone.textContent;
@@ -1159,12 +1262,9 @@
                     return;
                 }
 
-                // 克隆输出内容，移除三角符号和省略号
+                // 克隆输出内容，移除三角符号、拷贝按钮和省略号
                 const clone = output.cloneNode(true);
-                const collapseIcons = clone.querySelectorAll('.collapse-icon');
-                collapseIcons.forEach(icon => icon.remove());
-                const ellipsis = clone.querySelectorAll('.ellipsis');
-                ellipsis.forEach(el => el.remove());
+                clone.querySelectorAll('.collapse-icon, .copy-icon, .ellipsis').forEach(el => el.remove());
 
                 // 计算字符数（排除三角符号和省略号）
                 const charCount = clone.textContent.length;
@@ -1178,12 +1278,17 @@
                 }
             });
 
+            const exampleData = {
+                zh: `{"name":"张三","age":28,"email":"zhangsan@example.com","isActive":true,"score":null,"address":{"city":"北京","district":"朝阳区","street":"建国路100号","zipCode":"100020"},"hobbies":["读书","旅行","摄影","编程"],"education":[{"school":"清华大学","degree":"本科","year":2018},{"school":"北京大学","degree":"硕士","year":2021}]}`,
+                en: `{"name":"John Smith","age":28,"email":"john.smith@example.com","isActive":true,"score":null,"address":{"city":"New York","state":"NY","street":"100 Broadway","zipCode":"10001"},"hobbies":["reading","traveling","photography","coding"],"education":[{"school":"MIT","degree":"Bachelor","year":2018},{"school":"Stanford","degree":"Master","year":2021}]}`
+            };
+
             function tryFillExample() {
                 const input = document.getElementById('input');
                 const output = document.getElementById('output');
 
                 if (!input.value.trim() && !output.textContent.trim()) {
-                    input.value = `{"name":"张三","age":28,"email":"zhangsan@example.com","isActive":true,"score":null,"address":{"city":"北京","district":"朝阳区","street":"建国路100号","zipCode":"100020"},"hobbies":["读书","旅行","摄影","编程"],"education":[{"school":"清华大学","degree":"本科","year":2018},{"school":"北京大学","degree":"硕士","year":2021}]}`;
+                    input.value = exampleData[getLang()] || exampleData.zh;
                     updateInputInfo();
                     formatJSON();
                     showToast(getText('toastFillExample'), 'success');
@@ -1262,21 +1367,118 @@
                 const rightPanel = document.getElementById('rightPanel');
                 const resizerH = document.getElementById('resizerH');
                 const resizerV = document.getElementById('resizerV');
-                const inputTextarea = document.getElementById('input');
-                const outputWrapper = document.getElementById('output');
 
                 let isDragging = false;
+                // 获取可用于面板的总高度（受当前实际渲染高度影响）
+                function getAvailablePanelHeight() {
+                    const style = getComputedStyle(container);
+                    const contentHeight = container.clientHeight
+                        - parseFloat(style.paddingTop)
+                        - parseFloat(style.paddingBottom);
+                    const resizerStyle = getComputedStyle(resizerV);
+                    const resizerTotal = resizerV.offsetHeight
+                        + parseFloat(resizerStyle.marginTop)
+                        + parseFloat(resizerStyle.marginBottom);
+                    return contentHeight - resizerTotal;
+                }
+
+                // 获取视口真实能提供的面板总高度（不受当前 inline style 强撑的影响）
+                function getTrueAvailablePanelHeight() {
+                    if (!isVerticalLayout()) return getAvailablePanelHeight();
+
+                    const wrapperContainer = document.querySelector('.container');
+                    const oldWrapperMinHeight = wrapperContainer.style.getPropertyValue('min-height');
+                    const oldContainerMinHeight = container.style.getPropertyValue('min-height');
+                    const oldGrid = container.style.getPropertyValue('grid-template-rows');
+
+                    // 临时去掉限制以测量视口真正能给的高度
+                    wrapperContainer.style.setProperty('min-height', '0px', 'important');
+                    container.style.setProperty('min-height', '0px', 'important');
+                    container.style.setProperty('grid-template-rows', '0px auto 0px', 'important');
+
+                    const trueAvailable = getAvailablePanelHeight();
+
+                    // 恢复
+                    if (oldWrapperMinHeight) wrapperContainer.style.setProperty('min-height', oldWrapperMinHeight);
+                    else wrapperContainer.style.removeProperty('min-height');
+
+                    if (oldContainerMinHeight) container.style.setProperty('min-height', oldContainerMinHeight);
+                    else container.style.removeProperty('min-height');
+
+                    if (oldGrid) container.style.setProperty('grid-template-rows', oldGrid);
+                    else container.style.removeProperty('grid-template-rows');
+
+                    return trueAvailable;
+                }
+
+                // 根据存储的比例重新计算并应用像素值
+                function applyVerticalRatio() {
+                    if (verticalDragRatio === null || !isVerticalLayout()) return;
+                    const available = getAvailablePanelHeight();
+                    if (available <= 0) return;
+
+                    let topH = Math.round(available * verticalDragRatio);
+                    let bottomH = available - topH;
+
+                    if (topH < PANEL_MIN_HEIGHT) {
+                        topH = PANEL_MIN_HEIGHT;
+                        bottomH = available - topH;
+                    }
+                    if (bottomH < PANEL_MIN_HEIGHT) {
+                        bottomH = PANEL_MIN_HEIGHT;
+                        topH = available - bottomH;
+                    }
+
+                    container.style.gridTemplateRows = `${topH}px auto ${bottomH}px`;
+                }
+
+                // 垂直拖拽时限制最小高度并应用像素值
+                function applyVerticalDrag(newTopHeight, newBottomHeight) {
+                    let available = startLeftSize + startRightSize;
+
+                    if (newTopHeight < PANEL_MIN_HEIGHT) {
+                        newTopHeight = PANEL_MIN_HEIGHT;
+                        newBottomHeight = available - PANEL_MIN_HEIGHT;
+                    }
+                    if (newBottomHeight < PANEL_MIN_HEIGHT) {
+                        newBottomHeight = PANEL_MIN_HEIGHT;
+                        newTopHeight = available - PANEL_MIN_HEIGHT;
+                    }
+
+                    // 保持未固定的一侧按内容(1fr)自动吸收高度变化，从而保证总高度不变
+                    if (verticalFixedSide === 'top') {
+                        container.style.gridTemplateRows = `${newTopHeight}px auto 1fr`;
+                    } else {
+                        container.style.gridTemplateRows = `1fr auto ${newBottomHeight}px`;
+                    }
+                }
+
                 let isVertical = false;
                 let startPos = 0;
                 let startLeftSize = 0;
                 let startRightSize = 0;
 
-                const MIN_SIZE_PERCENT = 20; // 最小高度百分比（用于垂直布局）
+                // --- 新增：垂直布局自适应缩放状态追踪 ---
+                let verticalFixedSide = 'top'; // 'top' 或 'bottom'
+                let lastScreenY = window.screenY;
+                let lastWindowHeight = window.innerHeight;
+                let lastTopHeight = 0;
+                let lastBottomHeight = 0;
+                let wasVertical = false;
+
+                const PANEL_MIN_HEIGHT = 140; // 与 CSS --vertical-panel-min-height 一致
 
                 function isVerticalLayout() {
                     const config = currentLayoutConfig || layoutConfig.zh;
                     return window.innerWidth <= config.verticalBreakpoint;
                 }
+
+                function updateTrackedHeights() {
+                    if (!isVerticalLayout()) return;
+                    lastTopHeight = leftPanel.offsetHeight;
+                    lastBottomHeight = rightPanel.offsetHeight;
+                }
+                setTimeout(updateTrackedHeights, 100);
 
                 // 水平拖拽
                 resizerH.addEventListener('mousedown', (e) => {
@@ -1292,7 +1494,7 @@
                     e.preventDefault();
                 });
 
-                // 垂直拖拽
+                // 垂直拖拽 (PC)
                 resizerV.addEventListener('mousedown', (e) => {
                     if (!isVerticalLayout()) return;
                     isDragging = true;
@@ -1303,6 +1505,13 @@
                     resizerV.classList.add('dragging');
                     document.body.style.cursor = 'row-resize';
                     document.body.style.userSelect = 'none';
+
+                    // 拖拽开始时锁定当前状态，避免高度跳动
+                    if (verticalFixedSide === 'top') {
+                        container.style.gridTemplateRows = `${startLeftSize}px auto 1fr`;
+                    } else {
+                        container.style.gridTemplateRows = `1fr auto ${startRightSize}px`;
+                    }
                     e.preventDefault();
                 });
 
@@ -1312,7 +1521,6 @@
                     if (!isVertical) {
                         // 水平拖拽
                         const delta = e.clientX - startPos;
-                        const editorContainer = document.getElementById('editorContainer');
                         const totalWidth = startLeftSize + startRightSize;
 
                         let newLeftWidth = startLeftSize + delta;
@@ -1329,23 +1537,11 @@
                             newLeftWidth = totalWidth - minWidth;
                         }
 
-                        editorContainer.style.gridTemplateColumns = `${newLeftWidth}fr auto ${newRightWidth}fr`;
+                        container.style.gridTemplateColumns = `${newLeftWidth}fr auto ${newRightWidth}fr`;
                     } else {
                         // 垂直拖拽
                         const delta = e.clientY - startPos;
-                        const containerHeight = container.offsetHeight - resizerV.offsetHeight - 40;
-                        const newTopHeight = startLeftSize + delta;
-                        const newBottomHeight = startRightSize - delta;
-
-                        const minSize = containerHeight * MIN_SIZE_PERCENT / 100;
-
-                        if (newTopHeight >= minSize && newBottomHeight >= minSize) {
-                            // 使用minmax确保最小高度，fr按比例分配
-                            const total = newTopHeight + newBottomHeight;
-                            const topFr = newTopHeight / total;
-                            const bottomFr = newBottomHeight / total;
-                            container.style.gridTemplateRows = `minmax(0, ${topFr}fr) auto minmax(0, ${bottomFr}fr)`;
-                        }
+                        applyVerticalDrag(startLeftSize + delta, startRightSize - delta);
                     }
                 });
 
@@ -1356,10 +1552,13 @@
                         resizerV.classList.remove('dragging');
                         document.body.style.cursor = '';
                         document.body.style.userSelect = '';
+                        if (isVertical) {
+                            updateTrackedHeights();
+                        }
                     }
                 });
 
-                // 触摸支持
+                // 触摸支持 - 水平
                 resizerH.addEventListener('touchstart', (e) => {
                     if (isVerticalLayout()) return;
                     isDragging = true;
@@ -1371,6 +1570,7 @@
                     e.preventDefault();
                 });
 
+                // 触摸支持 - 垂直
                 resizerV.addEventListener('touchstart', (e) => {
                     if (!isVerticalLayout()) return;
                     isDragging = true;
@@ -1379,12 +1579,17 @@
                     startLeftSize = leftPanel.offsetHeight;
                     startRightSize = rightPanel.offsetHeight;
                     resizerV.classList.add('dragging');
+
+                    if (verticalFixedSide === 'top') {
+                        container.style.gridTemplateRows = `${startLeftSize}px auto 1fr`;
+                    } else {
+                        container.style.gridTemplateRows = `1fr auto ${startRightSize}px`;
+                    }
                     e.preventDefault();
                 });
 
                 document.addEventListener('touchmove', (e) => {
                     if (!isDragging) return;
-
                     const touch = e.touches[0];
 
                     if (!isVertical) {
@@ -1395,25 +1600,12 @@
                         let newRightWidth = totalWidth - newLeftWidth;
 
                         const minWidth = currentLayoutConfig.panelMinWidth;
-
                         if (newLeftWidth >= minWidth && newRightWidth >= minWidth) {
                             container.style.gridTemplateColumns = `${newLeftWidth}fr auto ${newRightWidth}fr`;
                         }
                     } else {
                         const delta = touch.clientY - startPos;
-                        const containerHeight = container.offsetHeight - resizerV.offsetHeight - 40;
-                        const newTopHeight = startLeftSize + delta;
-                        const newBottomHeight = startRightSize - delta;
-
-                        const minSize = containerHeight * MIN_SIZE_PERCENT / 100;
-
-                        if (newTopHeight >= minSize && newBottomHeight >= minSize) {
-                            // 使用minmax确保最小高度，fr按比例分配
-                            const total = newTopHeight + newBottomHeight;
-                            const topFr = newTopHeight / total;
-                            const bottomFr = newBottomHeight / total;
-                            container.style.gridTemplateRows = `minmax(0, ${topFr}fr) auto minmax(0, ${bottomFr}fr)`;
-                        }
+                        applyVerticalDrag(startLeftSize + delta, startRightSize - delta);
                     }
                 });
 
@@ -1422,13 +1614,80 @@
                         isDragging = false;
                         resizerH.classList.remove('dragging');
                         resizerV.classList.remove('dragging');
+                        if (isVertical) {
+                            updateTrackedHeights();
+                        }
                     }
                 });
 
-                // 窗口大小改变时重置
+                let resizeTimeout;
+                // 窗口大小改变时重置布局，以及根据缩放方向改变网格结构
                 window.addEventListener('resize', () => {
+                    const currentlyVertical = isVerticalLayout();
                     updateLayout();
+
+                    if (currentlyVertical) {
+                        let currentScreenY = window.screenY;
+                        let currentWindowHeight = window.innerHeight;
+
+                        // 仅在之前也是垂直布局时，应用智能缩放逻辑
+                        if (wasVertical && currentWindowHeight !== lastWindowHeight) {
+                            let deltaY = currentScreenY - lastScreenY;
+
+                            // 获取真实可用高度（绕开当前的 min-height 限制）
+                            const trueAvailableHeight = getTrueAvailablePanelHeight();
+
+                            // 从顶部改变窗口高度 (优先缩小上方的框)
+                            if (Math.abs(deltaY) > 0) {
+                                verticalFixedSide = 'bottom';
+                                if (lastBottomHeight > 0) {
+                                    let newTopHeight = trueAvailableHeight - lastBottomHeight;
+                                    if (newTopHeight <= PANEL_MIN_HEIGHT) {
+                                        // 如果上方框达到最小高度，则上方必须保持最小高度，下方用1fr负责吸收剩余空间
+                                        container.style.gridTemplateRows = `${PANEL_MIN_HEIGHT}px auto 1fr`;
+                                    } else {
+                                        // 否则下方框保持不变，上方框(1fr)自动缩小
+                                        container.style.gridTemplateRows = `1fr auto ${lastBottomHeight}px`;
+                                    }
+                                }
+                            } else {
+                                // 从底部改变窗口高度 (优先缩小下方的框)
+                                verticalFixedSide = 'top';
+                                if (lastTopHeight > 0) {
+                                    let newBottomHeight = trueAvailableHeight - lastTopHeight;
+                                    if (newBottomHeight <= PANEL_MIN_HEIGHT) {
+                                        // 如果下方框达到最小高度，则下方必须保持最小高度，上方用1fr负责吸收剩余空间
+                                        container.style.gridTemplateRows = `1fr auto ${PANEL_MIN_HEIGHT}px`;
+                                    } else {
+                                        // 否则上方框保持不变，下方框(1fr)自动缩小
+                                        container.style.gridTemplateRows = `${lastTopHeight}px auto 1fr`;
+                                    }
+                                }
+                            }
+                        }
+
+                        lastScreenY = currentScreenY;
+                        lastWindowHeight = currentWindowHeight;
+
+                        clearTimeout(resizeTimeout);
+                        resizeTimeout = setTimeout(() => {
+                            if (isVerticalLayout()) {
+                                updateTrackedHeights();
+                            }
+                            lastScreenY = window.screenY;
+                            lastWindowHeight = window.innerHeight;
+                        }, 200);
+                    } else {
+                        // 如果从垂直布局变成了水平布局，清除垂直模式下可能带有的 grid-template-rows
+                        if (wasVertical) {
+                            container.style.gridTemplateRows = '';
+                        }
+                    }
+
+                    wasVertical = currentlyVertical;
                 });
+
+                wasVertical = isVerticalLayout();
             })();
 
             // 主题切换逻辑
@@ -1570,7 +1829,7 @@
                     toastClearSuccess: 'Input cleared',
                     toastClearEmpty: 'Nothing to clear',
                     toastFillExample: 'Example data filled',
-                    toastInputEmpty: 'Please enter JSON data',
+                    toastInputEmpty: 'Please enter JSON',
                     toastJsonError: 'Invalid JSON: ',
                     toastJsonValid: 'Valid JSON',
                     themeTitleAuto: 'Switch Theme (Auto)',
